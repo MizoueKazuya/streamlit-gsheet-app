@@ -8,18 +8,15 @@ xls = pd.ExcelFile(EXCEL_FILE)
 sheet_names = [s for s in xls.sheet_names if s != "全件"]
 
 # タイトルとシート選択
-st.title("福山Bコース 閲覧アプリ（AgGrid版）")
+st.title("福山Bコース 閲覧アプリ（AgGrid + カード表示版）")
 selected_sheet = st.selectbox("表示する曜日を選んでください", sheet_names)
 
 # シートのデータを読み込み
 df = xls.parse(selected_sheet)
 df.columns = df.columns.map(lambda x: str(x).strip())
 
-# 「備考」列がなければ追加、あればstr型に統一
-if "備考" not in df.columns:
-    df["備考"] = ""
-else:
-    df["備考"] = df["備考"].astype(str)
+# 全ての列を文字列型に変換（NaN対応）
+df = df.astype(str)
 
 # AgGridの設定
 st.markdown("### 📋 得意先一覧（チェックして選択）")
@@ -41,13 +38,12 @@ grid_response = AgGrid(
 # 選択された行を取得
 selected = grid_response.get('selected_rows', [])
 
-# NaNやNoneに対応した表示用フォーマッタ
-def format_value(val):
-    if pd.isna(val) or str(val).lower() in ["nan", "none"]:
-        return ""
-    return str(val)
-
 # カード形式で表示
+def format_value(val):
+    if val.strip().lower() in ["nan", "none", ""]:
+        return ""
+    return val
+
 if isinstance(selected, list) and len(selected) > 0:
     row = selected[0]
     st.markdown("---")
