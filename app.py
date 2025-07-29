@@ -2,10 +2,8 @@ import streamlit as st
 import pandas as pd
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 
-# Excelファイル名
-EXCEL_FILE = "福山Bコース.xlsx"
-
 # Excelファイルの読み込み
+EXCEL_FILE = "福山Bコース.xlsx"
 xls = pd.ExcelFile(EXCEL_FILE)
 sheet_names = [s for s in xls.sheet_names if s != "全件"]
 
@@ -13,13 +11,11 @@ sheet_names = [s for s in xls.sheet_names if s != "全件"]
 st.title("福山Bコース 閲覧アプリ（AgGrid版）")
 selected_sheet = st.selectbox("表示する曜日を選んでください", sheet_names)
 
-# シートからデータを読み込み
+# シートのデータを読み込み
 df = xls.parse(selected_sheet)
-
-# 列名をクリーンアップ
 df.columns = df.columns.map(lambda x: str(x).strip())
 
-# 「備考」列がなければ追加、あればstr型に統一（invalid number対策）
+# 「備考」列がなければ追加、あればstr型に統一
 if "備考" not in df.columns:
     df["備考"] = ""
 else:
@@ -28,11 +24,11 @@ else:
 # AgGridの設定
 st.markdown("### 📋 得意先一覧（チェックして選択）")
 gb = GridOptionsBuilder.from_dataframe(df)
-gb.configure_selection('single', use_checkbox=True)  # チェックボックスで単一選択
+gb.configure_selection('single', use_checkbox=True)
 gb.configure_grid_options(domLayout='normal')
 grid_options = gb.build()
 
-# AgGrid 表示
+# 表の表示（AgGrid）
 grid_response = AgGrid(
     df,
     gridOptions=grid_options,
@@ -42,18 +38,18 @@ grid_response = AgGrid(
     fit_columns_on_grid_load=True,
 )
 
-# 選択された行の取得（Noneや予期せぬ型への対処を含む）
+# 選択された行を取得
 selected = grid_response.get('selected_rows', [])
 
-# カード形式で表示（安全性を強化）
+# NaNやNoneに対応した表示用フォーマッタ
+def format_value(val):
+    if pd.isna(val) or str(val).lower() in ["nan", "none"]:
+        return ""
+    return str(val)
+
+# カード形式で表示
 if isinstance(selected, list) and len(selected) > 0:
     row = selected[0]
-    if isinstance(row, pd.Series):
-        row = row.to_dict()
-
-    def format_value(val):
-        return "" if pd.isna(val) or val == "nan" else val
-
     st.markdown("---")
     st.markdown("### 🧾 カード表示")
 
