@@ -38,7 +38,7 @@ grid_response = AgGrid(
 # 選択された行を取得
 selected = grid_response.get('selected_rows', [])
 
-# カード形式で表示
+# --- カード表示部分 ---
 def format_value(val):
     if val.strip().lower() in ["nan", "none", ""]:
         return ""
@@ -58,6 +58,7 @@ if isinstance(selected, list) and len(selected) > 0:
     """)
 else:
     st.info("1件をチェックして選択してください。")
-    # デバッグ用：選択された行を表示
+
+# デバッグ用：選択された行を表示
 st.write("選択された行データ:", selected)
 
