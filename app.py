@@ -16,22 +16,21 @@ selected_sheet = st.selectbox("表示する曜日を選んでください", shee
 # シートからデータを読み込み
 df = xls.parse(selected_sheet)
 
-# 列名をクリーンアップ（空白や改行の削除）
+# 列名をクリーンアップ
 df.columns = df.columns.map(lambda x: str(x).strip())
 
-# 必要な列がなければ追加（空欄列）
-for col in ["備考"]:
-    if col not in df.columns:
-        df[col] = ""
+# 「備考」列がなければ空列を追加
+if "備考" not in df.columns:
+    df["備考"] = ""
 
 # AgGridの設定
-st.markdown("### 📋 得意先一覧（クリックして選択）")
+st.markdown("### 📋 得意先一覧（チェックして選択）")
 gb = GridOptionsBuilder.from_dataframe(df)
-gb.configure_selection('single', use_checkbox=True)  # 単一選択（チェックボックス式）
+gb.configure_selection('single', use_checkbox=True)  # チェックボックスで単一選択
 gb.configure_grid_options(domLayout='normal')
 grid_options = gb.build()
 
-# AgGridの表示
+# AgGrid 表示
 grid_response = AgGrid(
     df,
     gridOptions=grid_options,
@@ -41,12 +40,11 @@ grid_response = AgGrid(
     fit_columns_on_grid_load=True,
 )
 
-# 選択された行の取得
-selected = grid_response['selected_rows']
+# 選択された行の取得（Noneや予期せぬ型への対処を含む）
+selected = grid_response.get('selected_rows', [])
 
-# カード形式で表示
-if len(selected) > 0:
-    # 安全に辞書形式へ（DataFrameやSeries対応）
+# カード形式で表示（安全性を強化）
+if isinstance(selected, list) and len(selected) > 0:
     row = selected[0]
     if isinstance(row, pd.Series):
         row = row.to_dict()
