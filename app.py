@@ -13,25 +13,25 @@ sheet_names = [s for s in xls.sheet_names if s != "全件"]
 st.title("福山Bコース 閲覧アプリ（AgGrid版）")
 selected_sheet = st.selectbox("表示する曜日を選んでください", sheet_names)
 
-# シートからデータ読み込み
+# シートからデータを読み込み
 df = xls.parse(selected_sheet)
 
-# 列名の前後の空白などを除去して安全化
+# 列名をクリーンアップ（空白や改行の削除）
 df.columns = df.columns.map(lambda x: str(x).strip())
 
-# 必要な列がなければ追加
+# 必要な列がなければ追加（空欄列）
 for col in ["備考"]:
     if col not in df.columns:
         df[col] = ""
 
-# AgGrid 表示設定
-st.markdown("### 📋 得意先一覧（クリックで選択）")
+# AgGridの設定
+st.markdown("### 📋 得意先一覧（クリックして選択）")
 gb = GridOptionsBuilder.from_dataframe(df)
-gb.configure_selection('single', use_checkbox=True)  # 単一選択＋チェックボックス
+gb.configure_selection('single', use_checkbox=True)  # 単一選択（チェックボックス式）
 gb.configure_grid_options(domLayout='normal')
 grid_options = gb.build()
 
-# AgGrid 実行
+# AgGridの表示
 grid_response = AgGrid(
     df,
     gridOptions=grid_options,
@@ -45,8 +45,11 @@ grid_response = AgGrid(
 selected = grid_response['selected_rows']
 
 # カード形式で表示
-if len(selected) > 0 and isinstance(selected[0], dict):
+if len(selected) > 0:
+    # 安全に辞書形式へ（DataFrameやSeries対応）
     row = selected[0]
+    if isinstance(row, pd.Series):
+        row = row.to_dict()
 
     def format_value(val):
         return "" if pd.isna(val) else val
