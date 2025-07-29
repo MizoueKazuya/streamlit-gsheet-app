@@ -51,17 +51,19 @@ grid_response = AgGrid(
 selected = grid_response.get('selected_rows', [])
 
 # カード形式で選択行を表示
-if selected:
+if isinstance(selected, list) and len(selected) > 0:
     row = selected[0]
 
     def show_card(label, key, icon=""):
-        value = row.get(key, "").strip()
-        if value and value.lower() != "nan":
+        value = row.get(key, "")
+        if isinstance(value, str):
+            value = value.strip()
+        if value != "" and str(value).lower() != "nan":
             st.markdown(f"- {icon} **{label}**: {value}")
 
     st.markdown("---")
     st.markdown("### 🧾 選択された得意先の情報")
-    st.markdown(f"#### 🏪 {row.get('得意先名', '').strip()}")
+    st.markdown(f"#### 🏪 {row.get('得意先名', '')}")
     show_card("得意先番号", "得意先番号", "🔢")
     show_card("お盆休み", "お盆休み", "📅")
     show_card("来場予定数", "来場予定数", "📦")
