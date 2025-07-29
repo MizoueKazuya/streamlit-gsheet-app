@@ -16,37 +16,41 @@ selected_sheet = st.selectbox("表示する曜日を選んでください", shee
 # データ読み込み
 df = xls.parse(selected_sheet)
 
-# 必要な列を補完
+# 必要な列がなければ追加（例：備考）
 if "備考" not in df.columns:
     df["備考"] = ""
 
 # UI: Excel風テーブル（AgGrid）
 st.markdown("### 📋 得意先一覧（クリックして選択）")
 
+# グリッドオプション構成
 gb = GridOptionsBuilder.from_dataframe(df)
-gb.configure_selection('single', use_checkbox=True)  # 1行選択 & チェックボックス表示
+gb.configure_selection('single', use_checkbox=True)  # 単一選択＋チェックボックス
 gb.configure_grid_options(domLayout='normal')
 grid_options = gb.build()
 
+# AgGrid表示
 grid_response = AgGrid(
     df,
     gridOptions=grid_options,
     update_mode=GridUpdateMode.SELECTION_CHANGED,
     height=400,
-    theme="streamlit",  # "alpine", "material", "streamlit" など
+    theme="streamlit",  # 他に "alpine", "material" など
     fit_columns_on_grid_load=True,
 )
 
-# 選択行の取得
+# 選択された行を取得
 selected = grid_response['selected_rows']
 
-# カードUI表示（選択時のみ）
-if selected:
+# カード表示（行が選ばれていれば）
+if len(selected) > 0:
     row = selected[0]
 
+    # NaNを空文字に整形する関数
     def format_value(val):
         return "" if pd.isna(val) else val
 
+    # カード表示
     st.markdown("---")
     st.markdown("### 🧾 カード表示")
 
