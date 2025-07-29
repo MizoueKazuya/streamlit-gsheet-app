@@ -19,9 +19,11 @@ df = xls.parse(selected_sheet)
 # 列名をクリーンアップ
 df.columns = df.columns.map(lambda x: str(x).strip())
 
-# 「備考」列がなければ空列を追加
+# 「備考」列がなければ追加、あればstr型に統一（invalid number対策）
 if "備考" not in df.columns:
     df["備考"] = ""
+else:
+    df["備考"] = df["備考"].astype(str)
 
 # AgGridの設定
 st.markdown("### 📋 得意先一覧（チェックして選択）")
@@ -50,7 +52,7 @@ if isinstance(selected, list) and len(selected) > 0:
         row = row.to_dict()
 
     def format_value(val):
-        return "" if pd.isna(val) else val
+        return "" if pd.isna(val) or val == "nan" else val
 
     st.markdown("---")
     st.markdown("### 🧾 カード表示")
