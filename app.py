@@ -58,3 +58,6 @@ if isinstance(selected, list) and len(selected) > 0:
     """)
 else:
     st.info("1件をチェックして選択してください。")
+    # デバッグ用：選択された行を表示
+st.write("選択された行データ:", selected)
+
