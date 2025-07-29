@@ -1,50 +1,56 @@
 import streamlit as st
 import pandas as pd
 
-# Excelファイル名
+# Excelファイル
 EXCEL_FILE = "福山Bコース.xlsx"
 
-# ファイル読み込み
+# Excel読み込み
 xls = pd.ExcelFile(EXCEL_FILE)
 sheet_names = [s for s in xls.sheet_names if s != "全件"]
 
-# UI：タイトルとシート選択
+# タイトルとシート選択
 st.title("福山Bコース 閲覧アプリ")
 selected_sheet = st.selectbox("表示する曜日を選んでください", sheet_names)
 
-# シートからデータ取得
+# データ取得
 df = xls.parse(selected_sheet)
 
-# 必要な列が存在しない場合は追加
+# 必須列がなければ追加
 for col in ["備考"]:
     if col not in df.columns:
         df[col] = ""
 
-# UI：リスト表示（全体）
-st.markdown("### 📋 得意先一覧")
-st.dataframe(df)
-
-# UI：行選択
-st.markdown("### 🔍 表示したい得意先の行を選んでください")
-selected_index = st.number_input(
-    "行番号（0〜）", min_value=0, max_value=len(df) - 1, step=1
+# Data Editorを使って選択UI表示
+st.markdown("### 📋 得意先一覧（クリックして選択）")
+edited_df = st.data_editor(
+    df,
+    num_rows="dynamic",
+    use_container_width=True,
+    disabled=True,
+    hide_index=False,
+    key="data_editor"
 )
 
-# NaNを空文字として表示する関数
-def format_value(val):
-    return "" if pd.isna(val) else val
+# 選択された行のインデックス取得
+selected_row_index = st.session_state["data_editor"]["edited_rows"]
+if selected_row_index:
+    row_idx = list(selected_row_index.keys())[0]
+    selected_row = df.iloc[row_idx]
 
-# 選択された行を取得
-selected_row = df.iloc[selected_index]
+    # NaNを空文字として表示する関数
+    def format_value(val):
+        return "" if pd.isna(val) else val
 
-# UI：カード表示
-st.markdown("---")
-st.markdown("### 🧾 カード表示")
+    # カード表示
+    st.markdown("---")
+    st.markdown("### 🧾 カード表示")
 
-st.markdown(f"""
-#### 🏪 {format_value(selected_row['得意先名'])}
-- 🔢 **得意先番号**: {format_value(selected_row['得意先番号'])}
-- 📅 **お盆休み**: {format_value(selected_row['お盆休み'])}
-- 📦 **来場予定数**: {format_value(selected_row['来場予定数'])}
-- 📝 **備考**: {format_value(selected_row.get('備考', ''))}
-""")
+    st.markdown(f"""
+    #### 🏪 {format_value(selected_row['得意先名'])}
+    - 🔢 **得意先番号**: {format_value(selected_row['得意先番号'])}
+    - 📅 **お盆休み**: {format_value(selected_row['お盆休み'])}
+    - 📦 **来場予定数**: {format_value(selected_row['来場予定数'])}
+    - 📝 **備考**: {format_value(selected_row.get('備考', ''))}
+    """)
+else:
+    st.info("左の一覧から得意先を1行クリックしてください。")
