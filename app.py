@@ -1,24 +1,24 @@
 import streamlit as st
 import pandas as pd
 
-# Excelファイル読み込み
-df = pd.read_excel("福山Bコース.xlsx")
+# Excelの全シート読み込み
+sheet_dict = pd.read_excel("福山Bコース.xlsx", sheet_name=None)
 
-st.title("福山Bコース：カード表示")
+# シート名から選択（全件、月曜日〜土曜日）
+sheet_names = list(sheet_dict.keys())
+selected_sheet = st.selectbox("表示する曜日を選択", sheet_names)
 
-# 検索機能（任意）
-search = st.text_input("得意先番号または得意先名で検索")
+# 選択されたシートのDataFrameを取得
+df = sheet_dict[selected_sheet]
 
-if search:
-    df_filtered = df[df.astype(str).apply(lambda x: search in x.to_string(), axis=1)]
-else:
-    df_filtered = df
+# タイトル
+st.title(f"{selected_sheet}：カード表示")
 
 # カード表示
-for index, row in df_filtered.iterrows():
+for index, row in df.iterrows():
     with st.container():
         st.markdown("---")
-        st.markdown(f"### 🏢 {row['得意先名']}")
+        st.markdown(f"### {row['得意先名']}")  # ← アイコン削除済み
         st.markdown(f"""
         <div style="font-size:20px;">
             <b>得意先番号：</b>{row['得意先番号']}
