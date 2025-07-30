@@ -19,7 +19,11 @@ for index, row in df_filtered.iterrows():
     with st.container():
         st.markdown("---")
         st.markdown(f"### 🏢 {row['得意先名']}")
-        st.markdown(f"- 得意先番号：`{row['得意先番号']}`")
+        st.markdown(f"""
+        <div style="font-size:18px;">
+            <b>得意先番号：</b>{row['得意先番号']}
+        </div>
+        """, unsafe_allow_html=True)
         st.markdown(f"- お盆休み：**{row['お盆休み']}**")
         st.markdown(f"- 来場予定数：**{row['来場予定数']}**")
         st.markdown(f"- 備考：{row['備考']}")
