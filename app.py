@@ -20,7 +20,7 @@ for index, row in df_filtered.iterrows():
         st.markdown("---")
         st.markdown(f"### 🏢 {row['得意先名']}")
         st.markdown(f"""
-        <div style="font-size:18px;">
+        <div style="font-size:20px;">
             <b>得意先番号：</b>{row['得意先番号']}
         </div>
         """, unsafe_allow_html=True)
