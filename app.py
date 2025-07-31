@@ -1,6 +1,11 @@
 import os
 import streamlit as st
 import pandas as pd
+# ファビコン変更
+st.set_page_config(
+    page_title="2025年_お盆",
+    page_icon="Kicon.PNG"
+)
 
 # 🔸 福山●コース.xlsx に一致するファイルだけを対象とする
 excel_files = sorted([f for f in os.listdir() if f.startswith("福山") and f.endswith("コース.xlsx")])
